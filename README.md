@@ -1,6 +1,8 @@
 # Game of Life in AArch64 Assembly
 
 Conway's Game of Life in the terminal, written in AArch64 Linux assembly. It uses raw syscalls only, with no libc. The grid is 40 by 40 and each generation is drawn with block characters.
+## Demo
+![shooter-Demo](gol-shooter-demo.gif)   
 
 ## Build and run
 
