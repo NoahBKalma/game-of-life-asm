@@ -3,6 +3,7 @@
     dead: .ascii "  "                                   // 2 bytes for dead square, 0x20
     newline: .ascii "\n"                                // 0x0A
     sleep_time: .quad 0, 500000000                      // 0 seconds, 500,000,000 ns = 0.5 s
+    clear_screen_ansi: .ascii "\033[2J"                 // 4 bytes
 
 .bss
     calc_grid_buffer: .space 420                             // 20x20 grid with a newline character at the end of each row
@@ -19,14 +20,42 @@
     x20 = next frame grid buffer
     w12 = changed for whatever constant is needed
     w13 = changed for whatever constant is needed
+    w21 = main loop counter
+
+    SYSCALLS (exit, write, nanosleep)
+    x8 = syscall number
+    x0, x1, x2 = syscall arguments (x0 also holds the return value)
+
+    MAIN_LOOP
+    x1 = grid to print (argument for PRINT_GRID)
+    x9 = temp for swapping the grid pointers
+
+    FILL_GRID_ZEROS
+    x0 = grid buffer (argument)
+    w11 = loop counter
+    x10 = constant 21 (row length)
+    x13 = quotient (row)
+    x3 = remainder (column)
+    w12 = byte to write (newline or '0')
+
+    PRINT_GRID
+    x1 = grid buffer (argument)
+    x2 = 420, number of bytes to write
 
     CALC_STEP
     w9 = live neighbor count
-    w11 = loop counter
-    w15 = main loop counter
+    w11 = loop counter (index of the current cell)
+    w12 = index of the neighbor being checked, then the dead/alive constants
+    w10 = value of the neighbor being checked, then the current cell, then the cell to write
+    w13 = constant '1', then the column of the next cell
+    w14 = constant 21 (row length)
+    w15 = quotient (row of the next cell)
+
+    SLEEP
+    x0 = pointer to sleep_time
+    x1 = 0, no pointer for remaining time
 
 */
-
 _start:	
     ldr x19, =calc_grid_buffer  
     ldr x20, =new_grid_buffer
@@ -44,19 +73,28 @@ _start:
     strb w12, [x19, #65]            // write 1s at every corner
     
 
-    mov w15, wzr
+    mov w21, wzr
 MAIN_LOOP:
-    cmp w15, #8
+
+    cmp w21, #4
     b.gt 99f
+
+    mov x8, #0x40                   // clear screen ansi write syscall
+    mov x0, #1
+    ldr x1, =clear_screen_ansi
+    mov x2, #4
+    svc #0
 
     mov x1, x19                     // print grid argument
     bl PRINT_GRID
 
     bl CALC_STEP
     bl SLEEP
-    mov x19, x20                    // set the past grid to the new grid
+    mov x9, x19                     // swap the grids (swap pointer using tmp x9)
+    mov x19, x20
+    mov x20, x9
 
-    add w15, w15, #1
+    add w21, w21, #1
     b MAIN_LOOP
     
 99:
