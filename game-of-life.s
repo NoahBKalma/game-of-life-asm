@@ -2,12 +2,13 @@
     alive: .byte 0xE2, 0x96, 0x88, 0xE2, 0x96, 0x88     // 6 bytes for alive square
     dead: .ascii "  "                                   // 2 bytes for dead square, 0x20
     newline: .ascii "\n"                                // 0x0A
-    sleep_time: .quad 0, 500000000                      // 0 seconds, 500,000,000 ns = 0.5 s
+    sleep_time: .quad 0, 100000000                      // seconds than ns
     clear_screen_ansi: .ascii "\033[2J"                 // 4 bytes
 
 .bss
     calc_grid_buffer: .space 420                             // 20x20 grid with a newline character at the end of each row
-    new_grid_buffer: .space 420                             // new grid
+    next_grid_buffer: .space 420                             // new grid
+    render_grid_buffer: .space 2116                          // buffer for render grid, assume worst case so 324(6) + 76(2) + 20
 //  index = r * 21 + c        with c from 0 to 20
 //  add/subtract 21 to go up/down a row, add, subtract 1 to go left/right
 
@@ -27,7 +28,7 @@
     x0, x1, x2 = syscall arguments (x0 also holds the return value)
 
     MAIN_LOOP
-    x1 = grid to print (argument for PRINT_GRID)
+    x1 = grid to print (argument for PRINT_TEST_GRID)
     x9 = temp for swapping the grid pointers
 
     FILL_GRID_ZEROS
@@ -38,27 +39,35 @@
     x3 = remainder (column)
     w12 = byte to write (newline or '0')
 
-    PRINT_GRID
+    PRINT_TEST_GRID
     x1 = grid buffer (argument)
     x2 = 420, number of bytes to write
 
     CALC_STEP
     w9 = live neighbor count
-    w11 = loop counter (index of the current cell)
+    w11 = loop counter (index of current cell)
     w12 = index of the neighbor being checked, then the dead/alive constants
     w10 = value of the neighbor being checked, then the current cell, then the cell to write
     w13 = constant '1', then the column of the next cell
     w14 = constant 21 (row length)
-    w15 = quotient (row of the next cell)
+    w15 = quotient (row of next cell)
 
     SLEEP
     x0 = pointer to sleep_time
     x1 = 0, no pointer for remaining time
 
+    RENDER_GRID
+    x1 = grid to render
+    x9 = render_grid_buffer
+    w10 = buffer print length count
+    w11 = loop counter (index of current cell)
+    w12 = current cell
+    x13, x14 = addresses/storage of .data
+
 */
 _start:	
     ldr x19, =calc_grid_buffer  
-    ldr x20, =new_grid_buffer
+    ldr x20, =next_grid_buffer
 
     mov x0, x19                     // argument for FILL_GRID_ZEROS
     bl FILL_GRID_ZEROS
@@ -76,7 +85,7 @@ _start:
     mov w21, wzr
 MAIN_LOOP:
 
-    cmp w21, #4
+    cmp w21, #50
     b.gt 99f
 
     mov x8, #0x40                   // clear screen ansi write syscall
@@ -85,8 +94,8 @@ MAIN_LOOP:
     mov x2, #4
     svc #0
 
-    mov x1, x19                     // print grid argument
-    bl PRINT_GRID
+    mov x1, x19                     // render grid
+    bl RENDER_GRID
 
     bl CALC_STEP
     bl SLEEP
@@ -132,7 +141,7 @@ FILL_ZEROS_LOOP:
 99:
     ret
 
-PRINT_GRID:
+PRINT_TEST_GRID:
 // Parameters: x1 for grid buffer
 
     mov x8, #0x40                   // write syscall
@@ -141,7 +150,6 @@ PRINT_GRID:
     svc #0
 
     ret
-
 
 CALC_STEP:
     // need to loop through columns 1-18 (skip the first, last, and newline) and rows 1-19 too
@@ -209,7 +217,7 @@ CALC_LOOP:
     strb w10, [x20, x11]
     b 98f
 
-1:                              // BRANCH FOR CURRENT CELL ALIVE
+1:                                  // BRANCH FOR CURRENT CELL ALIVE
     cmp w9, #1
     b.gt 2f                     // ALL WITH <= 1 neighbors die
     sub w10, w10, #1            // make the cell dead in new grid
@@ -222,7 +230,7 @@ CALC_LOOP:
     strb w10, [x20, x11]
     b 98f
 
-3:                               // ALL WITH >= 4 neighbors die
+3:                                  // ALL WITH >= 4 neighbors die
     sub w10, w10, #1             // make the cell dead in new grid
     strb w10, [x20, x11]
     b 98f
@@ -241,8 +249,67 @@ CALC_LOOP:
     ret
 
 SLEEP:
+
     mov x8, #0x65               // nanosleep syscall
     ldr x0, =sleep_time
     mov x1, #0                  // no pointer for the remaining time
     svc #0
+
     ret
+
+
+RENDER_GRID:
+// Parameters: x1 for grid buffer to render
+
+    ldr x9, =render_grid_buffer
+    mov w10, wzr                    // buffer print length count, also new cell offset
+    mov x11, xzr                    // loop var through grid, also cell offset
+
+
+RENDER_LOOP:
+    cmp w11, #420
+    b.ge 99f
+
+    ldrb w12, [x1, x11]             // #0x30 ascii '0' or #0x31 ascii '1' or #0x0A ascii '\n'
+    cmp w12, #0x30                  // #0x30, ascii '0'
+    b.ne 1f
+
+    ldr x13, =dead
+    ldrh w14, [x13]                 // load 2 bytes into w14
+    strh w14, [x9, x10]             // store those 2 bytes into the render buffer
+    add w10, w10, #2    
+    b 98f
+
+1:                                  // check if its a 1
+    cmp w12, #0x31                  // #0x30, ascii '1'
+    b.ne 2f
+
+    ldr x13, =alive
+    ldr w14, [x13]
+    str w14, [x9, x10]
+    add w10, w10, #4                // add first 4 bytes, then last 2
+    ldrh w14, [x13, #4]
+    strh w14, [x9, x10]
+    add w10, w10, #2                // add first 4 bytes, then last 2   
+    b 98f
+
+2:                                  // otherwise its a newline
+    ldr x13, =newline
+    ldrb w14, [x13]
+    strb w14, [x9, x10]
+    add w10, w10, #1
+    b 98f
+
+98:
+    add w11, w11, #1
+    b RENDER_LOOP
+
+99:
+    mov x8, #0x40                   // write syscall
+    mov x0, #1
+    mov x1, x9
+    mov w2, w10
+    svc #0
+
+    ret
+
