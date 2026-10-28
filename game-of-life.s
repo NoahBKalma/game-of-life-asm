@@ -3,20 +3,27 @@
     dead: .ascii "  "                                   // 2 bytes for dead square, 0x20
     newline: .ascii "\n"                                // 0x0A
     sleep_time: .quad 0, 100000000                      // seconds than ns
-    clear_screen_ansi: .ascii "\033[2J"                 // 4 bytes
+    clear_screen_ansi: .ascii "\033[2J\033[H"           // 7 bytes
+    home_ansi: .ascii "\033[H"                          // 3 bytes
 
+
+    // presets (ai generated to fill grid with interesting values)
+    preset_1: .ascii "0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000010000000000000000000000\n0000000000000000000100000000000000000000\n0000000000000000110011100000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n"
+    preset_2: .ascii "0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000001111110110000000000000000\n0000000000000001111110110000000000000000\n0000000000000000000000110000000000000000\n0000000000000001100000110000000000000000\n0000000000000001100000110000000000000000\n0000000000000001100000110000000000000000\n0000000000000001100000000000000000000000\n0000000000000001101111110000000000000000\n0000000000000001101111110000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n"
+    preset_3: .ascii "0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000100000100000000000000000\n0000000000000001010001010000000000000000\n0000000000000001001010010000000000000000\n0000000000000000010001000000000000000000\n0000000000000000011011000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n0000000000000000000000000000000000000000\n"
 .bss
-    calc_grid_buffer: .space 420                             // 20x20 grid with a newline character at the end of each row
-    next_grid_buffer: .space 420                             // new grid
-    render_grid_buffer: .space 2116                          // buffer for render grid, assume worst case so 324(6) + 76(2) + 20
-//  index = r * 21 + c        with c from 0 to 20
-//  add/subtract 21 to go up/down a row, add, subtract 1 to go left/right
+    calc_grid_buffer: .space 1640                       // 40x40 grid with a newline character at the end of each row
+    next_grid_buffer: .space 1640                       // new grid
+    render_grid_buffer: .space 9019                     // buffer for render grid, assume worst case so 1444(6) + 156(2) + 40
+//  index = r * 41 + c        with c from 0 to 40
+//  add/subtract 41 to go up/down a row, add, subtract 1 to go left/right
 
 .text
 .global _start
 
 /* ----- Registers ------
 
+    x1 = argv[0]
     x19 = calc grid buffer
     x20 = next frame grid buffer
     w12 = changed for whatever constant is needed
@@ -34,14 +41,14 @@
     FILL_GRID_ZEROS
     x0 = grid buffer (argument)
     w11 = loop counter
-    x10 = constant 21 (row length)
+    x10 = constant 41 (row length)
     x13 = quotient (row)
     x3 = remainder (column)
     w12 = byte to write (newline or '0')
 
     PRINT_TEST_GRID
     x1 = grid buffer (argument)
-    x2 = 420, number of bytes to write
+    x2 = 1640, number of bytes to write
 
     CALC_STEP
     w9 = live neighbor count
@@ -49,7 +56,7 @@
     w12 = index of the neighbor being checked, then the dead/alive constants
     w10 = value of the neighbor being checked, then the current cell, then the cell to write
     w13 = constant '1', then the column of the next cell
-    w14 = constant 21 (row length)
+    w14 = constant 41 (row length)
     w15 = quotient (row of next cell)
 
     SLEEP
@@ -66,33 +73,50 @@
 
 */
 _start:	
-    ldr x19, =calc_grid_buffer  
-    ldr x20, =next_grid_buffer
+    // get argument to see what preset they want
 
-    mov x0, x19                     // argument for FILL_GRID_ZEROS
-    bl FILL_GRID_ZEROS
-    mov x0, x20                     // initialize new grid with zeros
-    bl FILL_GRID_ZEROS
-    
-    mov w12, #0x31                  // 1
-    strb w12, [x19, #24]            // write 1s at every corner
-    strb w12, [x19, #46]            // write 1s at every corner
-    strb w12, [x19, #67]            // write 1s at every corner
-    strb w12, [x19, #66]            // write 1s at every corner
-    strb w12, [x19, #65]            // write 1s at every corner
-    
+    ldr x19, =preset_1              // default is preset 1
+
+    ldr x0, [sp]                    // argc (# of arguments)
+    cmp x0, #2                      // 2 because the first is argc and the second is pointer to program
+    b.lt 10f                        // no argument, keep default
+
+    ldr x1, [sp, #16]               // pointer to argv[1], every arg after is an offset of 8 bytes
+    ldrb w1, [x1]                   // replace x1 with its value
+
+    cmp w1, '1'
+    b.ne 1f
+    ldr x19, =preset_1
+    b 10f
+1:
+    cmp w1, '2'
+    b.ne 2f
+    ldr x19, =preset_2
+    b 10f
+2:
+    cmp w1, '3'
+    b.ne 10f
+    ldr x19, =preset_3
+    b 10f
+
+10:
+    ldr x20, =next_grid_buffer   
 
     mov w21, wzr
-MAIN_LOOP:
-
-    cmp w21, #50
-    b.gt 99f
 
     mov x8, #0x40                   // clear screen ansi write syscall
     mov x0, #1
     ldr x1, =clear_screen_ansi
-    mov x2, #4
+    mov x2, #7
     svc #0
+
+MAIN_LOOP:
+
+    cmp w21, #100
+    b.gt 99f
+
+    mov x0, x20                     // initialize new grid with zeros
+    bl FILL_GRID_ZEROS
 
     mov x1, x19                     // render grid
     bl RENDER_GRID
@@ -117,14 +141,14 @@ FILL_GRID_ZEROS:
 // Parameters: x0 for grid buffer
 
     mov w11, #0             // loop counter
-    mov x10, #21           // constant to make grid 20 columns
+    mov x10, #41           // constant to make grid 40 columns
 FILL_ZEROS_LOOP:
-    cmp w11, #420
+    cmp w11, #1640
     b.ge 99f
 
     udiv x13, x11, x10
     msub x3, x13, x10, x11
-    cmp x3, #20
+    cmp x3, #40
     b.ne 2f
 
 1:
@@ -146,34 +170,33 @@ PRINT_TEST_GRID:
 
     mov x8, #0x40                   // write syscall
     mov x0, #1
-    mov x2, #420
+    mov x2, #1640
     svc #0
 
     ret
 
 CALC_STEP:
-    // need to loop through columns 1-18 (skip the first, last, and newline) and rows 1-19 too
-    // reference lines 31-34 for corners
-    // points should be, when modded by 21, between 1 and 18 inclusive
-    // exclude anything <22 and >396
-    mov w11, #22
+    // need to loop through columns 1-38 (skip the first, last, and newline) and rows 1-39 too
+    // points should be, when modded by 41, between 1 and 38 inclusive
+    // exclude anything <42 and >1596
+    mov w11, #42
 
 CALC_LOOP:
     mov w9, wzr                 // count of live neighbors
-    cmp w11, #396
+    cmp w11, #1596
     b.gt 99f
     
-    sub w12, w11, #22            // offset of neighbor up and left
+    sub w12, w11, #42            // offset of neighbor up and left
     ldrb w10, [x19, x12]         // puts the value of a neighbor in w10, cycles through all neighbors
     cmp w10, #0x31
     cinc w9, w9, eq
 
-    sub w12, w11, #21            // offset of neighbor up
+    sub w12, w11, #41            // offset of neighbor up
     ldrb w10, [x19, x12]
     cmp w10, #0x31
     cinc w9, w9, eq
 
-    sub w12, w11, #20            // offset of neighbor up and right
+    sub w12, w11, #40            // offset of neighbor up and right
     ldrb w10, [x19, x12]
     cmp w10, #0x31
     cinc w9, w9, eq
@@ -188,17 +211,17 @@ CALC_LOOP:
     cmp w10, #0x31
     cinc w9, w9, eq
 
-    add w12, w11, #20            // offset of neighbor down and left
+    add w12, w11, #40            // offset of neighbor down and left
     ldrb w10, [x19, x12]
     cmp w10, #0x31
     cinc w9, w9, eq
 
-    add w12, w11, #21            // offset of neighbor down
+    add w12, w11, #41            // offset of neighbor down
     ldrb w10, [x19, x12]
     cmp w10, #0x31
     cinc w9, w9, eq
 
-    add w12, w11, #22            // offset of neighbor down and right
+    add w12, w11, #42            // offset of neighbor down and right
     ldrb w10, [x19, x12]
     cmp w10, #0x31
     cinc w9, w9, eq
@@ -217,7 +240,7 @@ CALC_LOOP:
     strb w10, [x20, x11]
     b 98f
 
-1:                                  // BRANCH FOR CURRENT CELL ALIVE
+1:                              // BRANCH FOR CURRENT CELL ALIVE
     cmp w9, #1
     b.gt 2f                     // ALL WITH <= 1 neighbors die
     sub w10, w10, #1            // make the cell dead in new grid
@@ -237,12 +260,12 @@ CALC_LOOP:
 
 98:
     add w11, w11, #1
-    mov w14, #21                // skip the border columns
+    mov w14, #41                // skip the border columns
     udiv w15, w11, w14
-    msub w13, w15, w14, w11     // w13 = column of the next cell (index mod 21)
-    cmp w13, #19                // column 19 is the right border
+    msub w13, w15, w14, w11     // w13 = column of the next cell (index mod 41)
+    cmp w13, #39                // column 39 is the right border
     b.ne CALC_LOOP
-    add w11, w11, #3            // jump from column 19 to column 1 of the next row
+    add w11, w11, #3            // jump from column 39 to column 1 of the next row
     b CALC_LOOP
 
 99:
@@ -266,8 +289,17 @@ RENDER_GRID:
     mov x11, xzr                    // loop var through grid, also cell offset
 
 
+    ldr x13, =home_ansi             // put home_ansi at the start of the frame
+    ldrh w14, [x13]                 // put the first 2 bytes, then the last byte
+    strh w14, [x9]                  
+    ldrb w14, [x13, #2]             
+    strb w14, [x9, #2]              
+    mov w10, #3                     // start after first 3 home ansi bytes
+    mov x11, xzr                    // loop var through grid, also cell offset
+
 RENDER_LOOP:
-    cmp w11, #420
+
+    cmp w11, #1640
     b.ge 99f
 
     ldrb w12, [x1, x11]             // #0x30 ascii '0' or #0x31 ascii '1' or #0x0A ascii '\n'
